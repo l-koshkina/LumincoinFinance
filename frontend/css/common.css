@@ -1,0 +1,57 @@
+body {
+    margin: auto;
+
+}
+
+a {
+    text-decoration: none;
+}
+.signup {
+    font-size: 12px;
+}
+
+.dropdown-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-toggle svg {
+    fill: #052C65;
+}
+.dropdown-toggle.show svg {
+    fill: white;
+    rotate: 90deg;
+    transition: .3s;
+}
+.dropdown-toggle.show .category-nav {
+    color: white;
+}
+.dropdown-toggle::after {
+    display: none;
+}
+
+.nav-link.active svg {
+    fill: white;
+}
+
+.nav-link svg {
+    fill: #052C65;
+}
+
+
+input {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+
+
+.content {
+    padding: 100px 60px;
+}
+
+.title {
+    color: #052C65;
+}
