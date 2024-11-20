@@ -25,7 +25,7 @@ Chart.defaults.color = '#000';
         }]
     };
 
-    const expendituresData = {
+    const expensesData = {
         labels: [
             'Red',
             'Orange',
@@ -70,10 +70,10 @@ Chart.defaults.color = '#000';
         }
     );
     new Chart(
-        document.getElementById('expenditures'),
+        document.getElementById('expenses'),
         {
             type: 'pie',
-            data: expendituresData,
+            data: expensesData,
             options: {
                 responsive: true,
                 plugins: {
