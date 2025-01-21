@@ -1,3 +1,5 @@
+import {Auth} from "../services/auth";
+
 export class Login {
     constructor(openNewRoute) {
         this.openNewRoute = openNewRoute;
@@ -63,13 +65,8 @@ export class Login {
                 this.commonErrorElement.style.display = 'block';
 
             } else {
-
-                localStorage.setItem('accessToken', result.tokens.accessToken);
-                localStorage.setItem('refreshToken', result.tokens.refreshToken);
-                localStorage.setItem('userInfo', JSON.stringify(result.user));
-
+                Auth.setAuthInfo(result.tokens.accessToken, result.tokens.refreshToken, result.user);
                 this.openNewRoute('/');
-
             }
         }
     }

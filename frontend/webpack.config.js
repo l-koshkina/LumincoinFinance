@@ -39,6 +39,7 @@ module.exports = {
             patterns: [
                 {from: "./src/templates", to: "templates"},
                 {from: "./src/lib", to: "lib"},
+                {from: "./src/styles", to: "styles"},
             ],
         }),
     ],

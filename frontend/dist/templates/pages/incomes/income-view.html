@@ -1,44 +1,9 @@
 <div class="content">
     <h1 class="title mb-5">Доходы</h1>
 
-    <div class="income-categories d-flex flex-wrap gap-4">
-        <div class="card income-category pe-md-5 pe-0">
-            <div class="card-body pe-2 pe-md-5">
-                <h3 class="card-title mb-2">Депозиты</h3>
-                <div class="card-body-actions d-flex flex-wrap gap-1">
-                    <a href="/income-edit" class="btn btn-primary">Редактировать</a>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal">Удалить</button>
-                </div>
-            </div>
-        </div>
-        <div class="card income-category pe-md-5 pe-0">
-            <div class="card-body pe-2 pe-md-5">
-                <h3 class="card-title mb-2">Зарплата</h3>
-                <div class="card-body-actions d-flex flex-wrap gap-1">
-                    <a href="/income-edit" class="btn btn-primary">Редактировать</a>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal">Удалить</button>
-                </div>
-            </div>
-        </div>
-        <div class="card income-category pe-md-5 pe-0">
-            <div class="card-body pe-2 pe-md-5">
-                <h3 class="card-title mb-2">Сбережения</h3>
-                <div class="card-body-actions d-flex flex-wrap gap-1">
-                    <a href="/income-edit" class="btn btn-primary">Редактировать</a>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal">Удалить</button>
-                </div>
-            </div>
-        </div>
-        <div class="card income-category pe-md-5 pe-0">
-            <div class="card-body pe-2 pe-md-5">
-                <h3 class="card-title mb-2">Инвестиции</h3>
-                <div class="card-body-actions d-flex flex-wrap gap-1">
-                    <a href="/income-edit" class="btn btn-primary">Редактировать</a>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal">Удалить</button>
-                </div>
-            </div>
-        </div>
-        <a href="/income-create">
+    <div id="income-categories" class="income-categories d-flex flex-wrap gap-4">
+
+        <a id="create-new-category" href="/income-create">
             <div class="card add-income-category ps-5 pe-5">
                 <div class="card-body pe-4 pe-md-5 ps-4 ps-md-5 mx-3">
                     <p class="text-secondary fs-1 text-center pe-0 pe-md-5 ps-0 ps-md-5">+</p>
@@ -52,7 +17,7 @@
             <div class="modal-content">
                 <div class="modal-body text-center fw-bold py-4">
                     <p>Вы действительно хотите удалить категорию? Связанные доходы будут удалены навсегда.</p>
-                    <button type="button" class="btn btn-success me-2">Да, удалить</button>
+                    <button type="button" class="btn btn-success me-2" data-bs-dismiss="modal" id="confirm-delete-button">Да, удалить</button>
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Не удалять</button>
                 </div>
             </div>

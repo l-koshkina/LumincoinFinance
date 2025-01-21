@@ -23,7 +23,7 @@ export class Signup {
             this.fullNameInputElement.classList.add('is-invalid');
             this.fullNameErrorMessageElement.innerText = 'Укажите Ваше имя';
             isValid = false;
-        } else if (!this.fullNameInputElement.value.match(/^[A-ЯЁ][а-яё]+\s[A-ЯЁ][а-яё]+\s[A-ЯЁ][а-яё]+$/)) { //Убрать регулярку
+        } else if (!this.fullNameInputElement.value.match(/^[A-ЯЁ][а-яё]+\s[A-ЯЁ][а-яё]+\s[A-ЯЁ][а-яё]+$/)) {
             this.fullNameInputElement.classList.add('is-invalid');
             this.fullNameErrorMessageElement.innerText = 'Укажите полное имя';
             isValid = true;
@@ -88,9 +88,7 @@ export class Signup {
                 })
             })
 
-
             const result = await response.json();
-            console.log(result);
 
             if (result.error && result.validation) {
                 this.commonErrorElement.style.display = 'block';
@@ -99,8 +97,30 @@ export class Signup {
                 this.commonErrorElement.style.display = 'block';
                 this.commonErrorElement.innerText = 'Пользователь с таким e-mail уже существует';
             } else {
-                localStorage.setItem('userInfo', JSON.stringify(result.user));
-                this.openNewRoute('/login');
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: this.emailInputElement.value,
+                        password: this.passwordInputElement.value,
+                    })
+                })
+
+                const result = await response.json();
+
+                if (result.error || !result.tokens || !result.user) {
+                    this.commonErrorElement.style.display = 'block';
+
+                } else {
+                    localStorage.setItem('accessToken', result.tokens.accessToken);
+                    localStorage.setItem('refreshToken', result.tokens.refreshToken);
+                    localStorage.setItem('userInfo', JSON.stringify(result.user));
+
+                    this.openNewRoute('/');
+                }
             }
 
 

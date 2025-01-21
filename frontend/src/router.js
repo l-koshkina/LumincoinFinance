@@ -1,6 +1,14 @@
 import {Login} from "./components/auth/login.js";
 import {Main} from "./components/main.js";
 import {Signup} from "./components/auth/signup.js";
+import {IncomeView} from "./components/incomes/income-view";
+import {IncomeEdit} from "./components/incomes/income-edit";
+import {IncomeCreate} from "./components/incomes/income-create";
+import {Auth} from "./components/services/auth";
+import config from "../config/config";
+import {ExpenseView} from "./components/expenses/expense-view";
+import {ExpenseCreate} from "./components/expenses/expense-create";
+import {ExpenseEdit} from "./components/expenses/expense-edit";
 
 export class Router {
     constructor() {
@@ -44,7 +52,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/auth/signup.html',
                 useLayout: false,
                 load: () => {
-                    new Signup(this.openNewRoute.bind(this));;
+                    new Signup(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -53,7 +61,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/incomes/income-view.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new IncomeView(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -62,7 +70,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/incomes/income-create.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new IncomeCreate(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -71,7 +79,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/incomes/income-edit.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new IncomeEdit(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -80,7 +88,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/expenses/expense-view.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new ExpenseView(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -89,7 +97,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/expenses/expense-create.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new ExpenseCreate(this.openNewRoute.bind(this))
                 }
             },
             {
@@ -98,7 +106,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/expenses/expense-edit.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new ExpenseEdit(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -181,11 +189,28 @@ export class Router {
                     this.contentPageElement.innerHTML = await fetch(newRoute.useLayout).then(response => response.text());
                     const contentLayoutPageElement = document.getElementById('content-layout');
                     contentLayoutPageElement.innerHTML = await fetch(newRoute.filePathTemplate).then(response => response.text());
+                    this.activateMenuItem(newRoute);
                     if (document.body.clientWidth <= 768) {
                         document.getElementById('offcanvasExample').classList.add('offcanvas', 'offcanvas-start');
                         document.getElementById('offcanvas-btn').classList.remove('d-none');
                         document.getElementById('offcanvas-btn-close').classList.remove('d-none');
                     }
+
+                    //Установка баланса
+
+                    await this.setBalance();
+
+
+                    //Установка имени пользователя
+
+                    const usernameElement = document.getElementById('username');
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+                    if (userInfo.name && userInfo.lastName) {
+                        usernameElement.innerText = userInfo.name + ' ' + userInfo.lastName;
+                    }
+
+
                 } else {
                     this.contentPageElement.innerHTML = await fetch(newRoute.filePathTemplate).then(response => response.text());
                 }
@@ -200,4 +225,37 @@ export class Router {
         }
     }
 
+    activateMenuItem(route) {
+        document.querySelectorAll('.nav-link').forEach(item => {
+            const href = item.getAttribute('href');
+            if ((route.route.includes(href) && href !== '/') || (route.route === '/' && href === '/') || (href.startsWith('javascript:void(0)'))) {
+                item.classList.add('active');
+                item.classList.remove('link-dark');
+            } else {
+                item.classList.remove('active');
+                item.classList.add('link-dark');
+            }
+        });
+    }
+
+    async setBalance() {
+        const response = await fetch(config.host + '/balance', {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json',
+                'Accept': 'application/json',
+                'x-auth-token': Auth.getAuthInfo(Auth.accessTokenKey)
+            }
+        })
+
+        if (response.status === 401) {
+            const updateTokenResult = await Auth.updateRefreshToken();
+            if (updateTokenResult) {
+                await this.setBalance();
+            }
+        } else {
+            const result = await response.json();
+            document.getElementById('balance-amount').innerText = result.balance + '$';
+        }
+    }
 }
