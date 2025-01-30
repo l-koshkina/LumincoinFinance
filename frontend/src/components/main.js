@@ -1,15 +1,21 @@
 import Chart from "chart.js/auto";
 import {HttpUtils} from "../utils/http-utils";
+import {AuthUtils} from "../utils/auth-utils";
 
 Chart.defaults.color = '#000';
 
 export class Main {
-    constructor() {
+    constructor(openNewRoute) {
+        this.openNewRoute = openNewRoute;
         this.filterButtons = document.querySelectorAll('.filter-btn');
         this.dateFromElement = document.getElementById('start-interval');
         this.dateToElement = document.getElementById('end-interval');
         this.filter = 'today';
         this.query = '';
+
+        if (!AuthUtils.getAuthInfo(AuthUtils.accessTokenKey)) {
+            return this.openNewRoute('/login');
+        }
 
         this.getOperations(this.filter);
         this.setFilter();

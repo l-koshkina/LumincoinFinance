@@ -29,7 +29,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/main.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-                    new Main();
+                    new Main(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -241,13 +241,26 @@ export class Router {
     activateMenuItem(route) {
         document.querySelectorAll('.nav-link').forEach(item => {
             const href = item.getAttribute('href');
-            if ((route.route.includes(href) && href !== '/') || (route.route === '/' && href === '/') || (href.startsWith('javascript:void(0)'))) {
+            item.addEventListener('click', (e) => {
+                console.log(href)
+                if (href.startsWith('javascript:void(0)')) {
+                    item.classList.add('active');
+                    item.classList.remove('link-dark');
+                }
+            })
+            if (href === route.route) {
                 item.classList.add('active');
                 item.classList.remove('link-dark');
+            } else if (route.route === '/expense-view' || route.route === '/income-view') {
+                if (href.startsWith('javascript:void(0)')) {
+                    item.classList.add('active');
+                    item.classList.remove('link-dark');
+                }
             } else {
                 item.classList.remove('active');
                 item.classList.add('link-dark');
             }
+
         });
 
     }
