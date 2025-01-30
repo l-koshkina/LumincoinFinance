@@ -207,7 +207,7 @@ export class Router {
                     }
 
                     //Установка баланса
-
+                    // await this.setNewBalance();
                     await this.setBalance();
 
 
@@ -242,7 +242,6 @@ export class Router {
         document.querySelectorAll('.nav-link').forEach(item => {
             const href = item.getAttribute('href');
             item.addEventListener('click', (e) => {
-                console.log(href)
                 if (href.startsWith('javascript:void(0)')) {
                     item.classList.add('active');
                     item.classList.remove('link-dark');
@@ -274,7 +273,7 @@ export class Router {
 
     async setNewBalance() {
         await HttpUtils.request('/balance', 'PUT',true, {
-            newBalance: 1000
+            newBalance: 0
         })
     }
 }

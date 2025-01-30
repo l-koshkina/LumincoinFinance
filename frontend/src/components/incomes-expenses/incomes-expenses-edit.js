@@ -39,7 +39,6 @@ export class IncomesExpensesEdit {
             for (let i = 0; i < response.response.length; i++) {
                 if (response.response[i].title === result.response.category) {
                     this.categoryTitleSelect.value = response.response[i].id;
-                    console.log(this.categoryTitleSelect.value)
                 }
             }
 

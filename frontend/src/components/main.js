@@ -70,7 +70,6 @@ export class Main {
 
         if (!result.error && result.response) {
             const operations = result.response;
-            console.log(operations);
             this.getDataForDiagrams(operations);
         }
     }
