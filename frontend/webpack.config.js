@@ -40,6 +40,7 @@ module.exports = {
                 {from: "./src/templates", to: "templates"},
                 {from: "./src/lib", to: "lib"},
                 {from: "./src/styles", to: "styles"},
+                {from: "./node_modules/bootstrap-icons", to: "lib/bootstrap-icons"},
             ],
         }),
     ],

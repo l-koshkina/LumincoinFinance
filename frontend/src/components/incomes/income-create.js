@@ -1,4 +1,4 @@
-import config from "../../../config/config";
+import {HttpUtils} from "../../utils/http-utils";
 
 export class IncomeCreate {
     constructor(openNewRoute) {
@@ -9,17 +9,9 @@ export class IncomeCreate {
     }
 
     async newIncomeCreate() {
-        const response = await fetch(config.host + '/categories/income', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': localStorage.getItem('accessToken')
-            },
-            body: JSON.stringify({title: this.newIncomeTitleInput.value})
-        })
-
-        const result = await response.json();
+        const result = await HttpUtils.request('/categories/income', 'POST', true, {
+            title: this.newIncomeTitleInput.value
+        });
 
         if (result.error && this.newIncomeTitleInput.value === "") {
             alert('Укажите название категории')

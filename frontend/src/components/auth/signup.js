@@ -1,3 +1,7 @@
+import {HttpUtils} from "../../utils/http-utils";
+import {AuthUtils} from "../../utils/auth-utils";
+import {AuthService} from "../../services/auth-service";
+
 export class Signup {
     constructor(openNewRoute) {
         this.openNewRoute = openNewRoute;
@@ -72,23 +76,15 @@ export class Signup {
         this.commonErrorElement.style.display = 'none';
 
         if (this.validateForm()) {
-            const response = await fetch('http://localhost:3000/api/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: this.fullNameInputElement.value.split(' ')[1],
-                    lastName: this.fullNameInputElement.value.split(' ')[0],
-                    email: this.emailInputElement.value,
-                    password: this.passwordInputElement.value,
-                    passwordRepeat: this.passwordRepeatInputElement.value,
-
-                })
-            })
-
-            const result = await response.json();
+            const data = {
+                name: this.fullNameInputElement.value.split(' ')[1],
+                lastName: this.fullNameInputElement.value.split(' ')[0],
+                email: this.emailInputElement.value,
+                password: this.passwordInputElement.value,
+                passwordRepeat: this.passwordRepeatInputElement.value
+            }
+            const response = await HttpUtils.request('/signup', 'POST', false, data);
+            const result = response.response;
 
             if (result.error && result.validation) {
                 this.commonErrorElement.style.display = 'block';
@@ -97,34 +93,18 @@ export class Signup {
                 this.commonErrorElement.style.display = 'block';
                 this.commonErrorElement.innerText = 'Пользователь с таким e-mail уже существует';
             } else {
-                const response = await fetch('http://localhost:3000/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: this.emailInputElement.value,
-                        password: this.passwordInputElement.value,
-                    })
+                const result = await AuthService.login({
+                    email: this.emailInputElement.value,
+                    password: this.passwordInputElement.value
                 })
 
-                const result = await response.json();
-
-                if (result.error || !result.tokens || !result.user) {
-                    this.commonErrorElement.style.display = 'block';
-
-                } else {
-                    localStorage.setItem('accessToken', result.tokens.accessToken);
-                    localStorage.setItem('refreshToken', result.tokens.refreshToken);
-                    localStorage.setItem('userInfo', JSON.stringify(result.user));
-
+                if (result && result.tokens && result.user) {
+                    AuthUtils.setAuthInfo(result.tokens.accessToken, result.tokens.refreshToken, result.user)
                     this.openNewRoute('/');
+                } else {
+                    this.commonErrorElement.style.display = 'block';
                 }
             }
-
-
-
         }
     }
 }

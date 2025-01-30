@@ -1,3 +1,5 @@
+@import '/lib/bootstrap-icons/font/bootstrap-icons.css';
+
 body {
     margin: auto;
 
@@ -50,6 +52,10 @@ input {
     padding: 100px 60px;
 }
 
+#content-layout {
+    overflow-y: scroll;
+}
+
 .title {
     color: #052C65;
 }
@@ -63,4 +69,9 @@ input {
 .dropdown-menu.dropdown-item:hover {
     background-color: #0d6efd; !important;
     color: white; !important;
+}
+
+
+.bi {
+    color: black;
 }

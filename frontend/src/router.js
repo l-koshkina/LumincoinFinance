@@ -4,11 +4,16 @@ import {Signup} from "./components/auth/signup.js";
 import {IncomeView} from "./components/incomes/income-view";
 import {IncomeEdit} from "./components/incomes/income-edit";
 import {IncomeCreate} from "./components/incomes/income-create";
-import {Auth} from "./components/services/auth";
+import {AuthUtils} from "./utils/auth-utils";
 import config from "../config/config";
 import {ExpenseView} from "./components/expenses/expense-view";
 import {ExpenseCreate} from "./components/expenses/expense-create";
 import {ExpenseEdit} from "./components/expenses/expense-edit";
+import {Logout} from "./components/auth/logout";
+import {IncomesExpensesCreate} from "./components/incomes-expenses/incomes-expenses-create";
+import {IncomesExpensesView} from "./components/incomes-expenses/incomes-expenses-view";
+import {IncomesExpensesEdit} from "./components/incomes-expenses/incomes-expenses-edit";
+import {HttpUtils} from "./utils/http-utils";
 
 export class Router {
     constructor() {
@@ -53,6 +58,12 @@ export class Router {
                 useLayout: false,
                 load: () => {
                     new Signup(this.openNewRoute.bind(this));
+                }
+            },
+            {
+                route: '/logout',
+                load: () => {
+                    new Logout(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -115,7 +126,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/incomes-expenses/incomes-expenses.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new IncomesExpensesView(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -124,7 +135,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/incomes-expenses/incomes-expenses-create.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new IncomesExpensesCreate(this.openNewRoute.bind(this));
                 }
             },
             {
@@ -133,7 +144,7 @@ export class Router {
                 filePathTemplate: '/templates/pages/incomes-expenses/incomes-expenses-edit.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-
+                    new IncomesExpensesEdit(this.openNewRoute.bind(this));
                 }
             },
 
@@ -204,10 +215,13 @@ export class Router {
                     //Установка имени пользователя
 
                     const usernameElement = document.getElementById('username');
-                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    const userInfo = JSON.parse(AuthUtils.getAuthInfo(AuthUtils.userInfoKey));
 
-                    if (userInfo.name && userInfo.lastName) {
+                    if (userInfo && userInfo.name && userInfo.lastName) {
                         usernameElement.innerText = userInfo.name + ' ' + userInfo.lastName;
+                    } else {
+                        history.pushState({}, '', '/login');
+                        await this.activateRoute();
                     }
 
 
@@ -236,26 +250,19 @@ export class Router {
                 item.classList.add('link-dark');
             }
         });
+
     }
 
     async setBalance() {
-        const response = await fetch(config.host + '/balance', {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': Auth.getAuthInfo(Auth.accessTokenKey)
-            }
-        })
-
-        if (response.status === 401) {
-            const updateTokenResult = await Auth.updateRefreshToken();
-            if (updateTokenResult) {
-                await this.setBalance();
-            }
-        } else {
-            const result = await response.json();
-            document.getElementById('balance-amount').innerText = result.balance + '$';
+        const result = await HttpUtils.request('/balance')
+        if (!result.error && result.response) {
+            document.getElementById('balance-amount').innerText = result.response.balance + '$';
         }
+    }
+
+    async setNewBalance() {
+        await HttpUtils.request('/balance', 'PUT',true, {
+            newBalance: 1000
+        })
     }
 }

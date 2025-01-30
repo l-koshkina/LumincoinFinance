@@ -1,4 +1,6 @@
-import {Auth} from "../services/auth";
+import {AuthUtils} from "../../utils/auth-utils";
+import {HttpUtils} from "../../utils/http-utils";
+import {AuthService} from "../../services/auth-service";
 
 export class Login {
     constructor(openNewRoute) {
@@ -45,28 +47,17 @@ export class Login {
         this.commonErrorElement.style.display = 'none';
 
         if (this.validateForm()) {
-            const response = await fetch('http://localhost:3000/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: this.emailInputElement.value,
-                    password: this.passwordInputElement.value,
-                    rememberMe: this.rememberMeElement.checked
+            const result = await AuthService.login({
+                email: this.emailInputElement.value,
+                password: this.passwordInputElement.value,
+                rememberMe: this.rememberMeElement.checked
+            });
 
-                })
-            })
-
-            const result = await response.json();
-
-            if (result.error || !result.tokens || !result.user) {
-                this.commonErrorElement.style.display = 'block';
-
-            } else {
-                Auth.setAuthInfo(result.tokens.accessToken, result.tokens.refreshToken, result.user);
+            if (result && result.tokens && result.user) {
+                AuthUtils.setAuthInfo(result.tokens.accessToken, result.tokens.refreshToken, result.user);
                 this.openNewRoute('/');
+            } else {
+                this.commonErrorElement.style.display = 'block';
             }
         }
     }

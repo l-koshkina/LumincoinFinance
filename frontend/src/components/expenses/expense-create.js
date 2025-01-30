@@ -1,4 +1,4 @@
-import config from "../../../config/config";
+import {HttpUtils} from "../../utils/http-utils";
 
 export class ExpenseCreate {
     constructor(openNewRoute) {
@@ -9,18 +9,9 @@ export class ExpenseCreate {
     }
 
     async newExpenseCreate () {
-        const response = await fetch(config.host + '/categories/expense', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': localStorage.getItem('accessToken')
-            },
-            body: JSON.stringify({title: this.newExpenseTitleInput.value})
-        })
-
-        const result = await response.json();
-
+        const result = await HttpUtils.request('/categories/expense', 'POST', true, {
+            title: this.newExpenseTitleInput.value
+        });
 
         if (result.error && this.newExpenseTitleInput.value === "") {
             alert('Укажите название категории')

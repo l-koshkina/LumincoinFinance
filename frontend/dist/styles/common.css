@@ -1,3 +1,5 @@
+@import '/lib/bootstrap-icons/font/bootstrap-icons.css';
+
 body {
     margin: auto;
 
@@ -48,6 +50,10 @@ input {
 
 .content {
     padding: 100px 60px;
+}
+
+#content-layout {
+    overflow-y: scroll;
 }
 
 .title {

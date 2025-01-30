@@ -1,5 +1,4 @@
-import config from "../../../config/config";
-import {Auth} from "../services/auth";
+import {HttpUtils} from "../../utils/http-utils";
 
 export class IncomeView {
     constructor(openNewRoute) {
@@ -7,27 +6,17 @@ export class IncomeView {
         this.incomeCategoriesElement = document.getElementById('income-categories');
         this.createNewCategoryElement = document.getElementById('create-new-category');
         this.showCategoriesIncomes().then();
-        this.createNewCategoryElement.addEventListener('click', this.createNewCategory.bind(this));
     }
 
     async showCategoriesIncomes() {
-        const response = await fetch(config.host + '/categories/income', {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': Auth.getAuthInfo(Auth.accessTokenKey)
-            },
-        })
+        let result = await HttpUtils.request('/categories/income')
 
-        if (response.status === 401) {
-            const updateTokenResult = await Auth.updateRefreshToken();
-            if (updateTokenResult) {
-                await this.showCategoriesIncomes();
-            }
+        if (!result.error && result.response) {
+            result = result.response;
+        } else {
+            alert('Не удалось загрузить категории');
+            return;
         }
-
-        const result = await response.json();
 
         result.forEach(item => {
             const cardElement = document.createElement('div');
@@ -52,7 +41,7 @@ export class IncomeView {
 
         })
 
-        this.deleteIncomeCategory();
+        await this.deleteIncomeCategory();
     }
 
     async deleteIncomeCategory() {
@@ -63,40 +52,16 @@ export class IncomeView {
                 button.addEventListener('click',  () => {
                     this.id = button.getAttribute('data-id-category');
                     document.getElementById('confirm-delete-button').addEventListener('click', async () => {
-                        const response = await fetch(config.host + '/categories/income/' + this.id, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-type': 'application/json',
-                                'Accept': 'application/json',
-                                'x-auth-token': localStorage.getItem('accessToken')
-                            },
-                        });
+                        const result = await HttpUtils.request('/categories/income/' + this.id, 'DELETE');
 
-                        const result = await response.json();
-
-                        if (result.error === false) {
+                        if (!result.error && result.response) {
                             this.openNewRoute('/income-view');
                         } else {
-                            console.error('Ошибка удаления категории:', result.error);
+                            alert('Ошибка удаления категории');
                         }
                     })
                 });
             });
         }
     }
-
-
-    async createNewCategory() {
-        const newCategoryTitleElement = document.getElementById('new-income-title');
-        await fetch(config.host + '/categories/income/', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': localStorage.getItem('accessToken')
-            },
-            body: JSON.stringify({title: newCategoryTitleElement.value})
-        })
-    }
-
 }

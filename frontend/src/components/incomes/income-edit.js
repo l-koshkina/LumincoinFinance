@@ -1,5 +1,5 @@
-import config from "../../../config/config";
-import {UrlUtils} from "../../../utils/url-utils";
+import {UrlUtils} from "../../utils/url-utils";
+import {HttpUtils} from "../../utils/http-utils";
 
 export class IncomeEdit {
     constructor(openNewRoute) {
@@ -13,41 +13,24 @@ export class IncomeEdit {
         this.saveButtonElement = document.getElementById('save-button');
         this.saveButtonElement.addEventListener('click', this.saveChangeCategory.bind(this))
         this.incomeTitleInputElement = document.getElementById('new-income-title')
-
-
     }
-
 
     async getCategoryTitle () {
-        const response = await fetch(config.host + '/categories/income/'+ this.id, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': localStorage.getItem('accessToken')
-            }
-        })
+        const result = await HttpUtils.request('/categories/income/'+ this.id);
 
-        if (response) {
-            const result = await response.json();
-            this.incomeTitleInputElement.value = result.title;
+        if (!result.error && result.response) {
+            this.incomeTitleInputElement.value = result.response.title;
+        } else {
+            this.incomeTitleInputElement.value = '';
         }
-
     }
 
-
     async saveChangeCategory () {
-        const response = await fetch(config.host + '/categories/income/' + this.id, {
-            method: 'PUT',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'x-auth-token': localStorage.getItem('accessToken')
-            },
-            body: JSON.stringify({title:this.incomeTitleInputElement.value})
-        })
+        const result = await HttpUtils.request('/categories/income/' + this.id, 'PUT', true, {
+            title:this.incomeTitleInputElement.value
+        });
 
-        if (response && response.status === 400) {
+        if (result.error) {
             alert('Введите название');
             return;
         } else {
