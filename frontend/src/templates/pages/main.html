@@ -1,19 +1,22 @@
 <h1 class="main-title mb-5 pt-5">Главная</h1>
 
 <div class="filter-buttons d-flex flex-wrap align-items-center gap-3 mb-5 justify-content-center justify-content-md-start">
-    <button class="btn btn-secondary px-3">Сегодня</button>
-    <button class="btn btn-secondary bg-transparent text-secondary px-3">Неделя</button>
-    <button class="btn btn-secondary bg-transparent text-secondary px-3">Месяц</button>
-    <button class="btn btn-secondary bg-transparent text-secondary px-3">Год</button>
-    <button class="btn btn-secondary bg-transparent text-secondary px-3">Все</button>
-    <button class="btn btn-secondary bg-transparent text-secondary px-3">Интервал</button>
-    <span class="interval">
-        <span>
-                c
-                <input type="date" class="start-interval text-secondary ms-2 me-3 mb-sm-0 mb-3">
-                по
-                <input type="date" class="end-interval text-secondary ms-2 me-2">
-        </span>
+    <button class="filter-btn btn btn-secondary px-3" data-filter-name="today">Сегодня</button>
+    <button class="filter-btn btn btn-secondary bg-transparent text-secondary px-3" data-filter-name="week">Неделя</button>
+    <button class="filter-btn btn btn-secondary bg-transparent text-secondary px-3" data-filter-name="month">Месяц</button>
+    <button class="filter-btn btn btn-secondary bg-transparent text-secondary px-3" data-filter-name="year">Год</button>
+    <button class="filter-btn btn btn-secondary bg-transparent text-secondary px-3" data-filter-name="all">Все</button>
+    <button class="filter-btn btn btn-secondary bg-transparent text-secondary px-3" data-filter-name="interval">Интервал</button>
+    <div class="interval d-flex flex-wrap gap-2 align-items-center justify-content-center">
+        <div class="d-flex align-items-center justify-content-end">
+            <label for="start-interval">с</label>
+            <input id="start-interval" type="date" class="start-interval text-secondary ms-2">
+        </div>
+        <div class="d-flex align-items-center justify-content-end">
+            <label for="end-interval">по</label>
+            <input id="end-interval" type="date" class="end-interval text-secondary ms-2 me-2">
+        </div>
+    </div>
 </div>
 
 <div class="diagrams d-flex flex-wrap gap-5">

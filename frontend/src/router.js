@@ -5,7 +5,6 @@ import {IncomeView} from "./components/incomes/income-view";
 import {IncomeEdit} from "./components/incomes/income-edit";
 import {IncomeCreate} from "./components/incomes/income-create";
 import {AuthUtils} from "./utils/auth-utils";
-import config from "../config/config";
 import {ExpenseView} from "./components/expenses/expense-view";
 import {ExpenseCreate} from "./components/expenses/expense-create";
 import {ExpenseEdit} from "./components/expenses/expense-edit";
