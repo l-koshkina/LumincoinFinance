@@ -1,17 +1,31 @@
 import {HttpUtils} from "../../utils/http-utils";
+import {OpenNewRouteType} from "../../types/openNewRoute.type";
+import {DefaultResponseType} from "../../types/default-response.type";
+import {CategoriesType} from "../../types/categories.type";
 
 export class ExpenseView {
-    constructor(openNewRoute) {
+    readonly openNewRoute: OpenNewRouteType;
+    readonly expenseCategoriesElement: HTMLElement | null;
+    readonly createNewCategoryElement: HTMLElement | null;
+    private deleteCategoryButtons: HTMLCollectionOf<Element> | null;
+    private id: string | null;
+    private confirmDeleteButtonElement: HTMLElement | null;
+
+
+    constructor(openNewRoute: OpenNewRouteType) {
         this.openNewRoute = openNewRoute;
         this.expenseCategoriesElement = document.getElementById('expense-categories');
         this.createNewCategoryElement = document.getElementById('create-new-category');
+        this.deleteCategoryButtons = null;
+        this.id = '';
+        this.confirmDeleteButtonElement = null;
         this.showCategoriesExpenses().then();
     }
 
-    async showCategoriesExpenses () {
-        let result = await HttpUtils.request('/categories/expense');
-        if (!result.error && result.response) {
-            result = result.response;
+    private async showCategoriesExpenses(): Promise<void> {
+        let result: DefaultResponseType | CategoriesType[] = await HttpUtils.request('/categories/expense');
+        if (!(result as DefaultResponseType).error && (result as DefaultResponseType).response) {
+            result = (result as DefaultResponseType).response as CategoriesType[];
         } else {
             alert('Не удалось загрузить категории');
             return;
@@ -36,28 +50,33 @@ export class ExpenseView {
             cardBodyElement.appendChild(cardBodyActionsElement);
 
             cardElement.appendChild(cardBodyElement);
-            this.expenseCategoriesElement.insertBefore(cardElement, this.createNewCategoryElement);
+            if (this.expenseCategoriesElement) {
+                this.expenseCategoriesElement.insertBefore(cardElement, this.createNewCategoryElement);
+            }
         });
 
         await this.deleteExpenseCategory();
     }
 
-    async deleteExpenseCategory() {
+    private async deleteExpenseCategory(): Promise<void> {
         this.deleteCategoryButtons = document.getElementsByClassName('btn-delete-category');
 
         if (this.deleteCategoryButtons.length > 0) {
             Array.from(this.deleteCategoryButtons).forEach((button, index) => {
-                button.addEventListener('click',  () => {
+                button.addEventListener('click', () => {
                     this.id = button.getAttribute('data-id-category');
-                    document.getElementById('confirm-delete-button').addEventListener('click', async () => {
-                        let result = await HttpUtils.request('/categories/expense/' + this.id, 'DELETE')
+                    this.confirmDeleteButtonElement = document.getElementById('confirm-delete-button');
+                    if (this.confirmDeleteButtonElement) {
+                        this.confirmDeleteButtonElement.addEventListener('click', async () => {
+                            let result = await HttpUtils.request('/categories/expense/' + this.id, 'DELETE')
 
-                        if (!result.error && result.response) {
-                            this.openNewRoute('/expense-view');
-                        } else {
-                            alert('Ошибка удаления категории');
-                        }
-                    })
+                            if (!result.error && result.response) {
+                                await this.openNewRoute('/expense-view');
+                            } else {
+                                alert('Ошибка удаления категории');
+                            }
+                        })
+                    }
                 });
             });
         }

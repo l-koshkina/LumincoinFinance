@@ -1,14 +1,15 @@
 import config from "../../config/config";
 import {AuthUtils} from "./auth-utils";
+import {DefaultResponseType} from "../types/default-response.type";
 
 export class HttpUtils {
-    static async request(url, method = "GET", useAuth = true, body = null) {
-        const result = {
+    public static async request(url: string, method: string = "GET", useAuth: boolean = true, body: any = null): Promise<any> {
+        const result: DefaultResponseType = {
             error: false,
             response: null
         }
 
-        const params = {
+        const params: any = {
             method: method,
             headers: {
                 'Content-type': 'application/json',
@@ -16,7 +17,7 @@ export class HttpUtils {
             },
         };
 
-        let token = null;
+        let token: string | null = null;
         if (useAuth) {
             token = AuthUtils.getAuthInfo(AuthUtils.accessTokenKey);
             if (token) {
@@ -28,7 +29,7 @@ export class HttpUtils {
             params.body = JSON.stringify(body);
         }
 
-        let response = null;
+        let response: Response | null = null;
         try {
             response = await fetch(config.host + url, params);
             result.response = await response.json();

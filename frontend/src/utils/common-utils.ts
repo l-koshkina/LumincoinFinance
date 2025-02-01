@@ -1,7 +1,7 @@
 import config from "../../config/config";
 
 export class CommonUtils {
-    static getTypeHtml(type) {
+    static getTypeHtml(type: string) {
         let typeHtml = null;
         switch (type) {
             case config.categoryTypes.income:

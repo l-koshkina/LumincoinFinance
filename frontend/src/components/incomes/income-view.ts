@@ -1,18 +1,31 @@
 import {HttpUtils} from "../../utils/http-utils";
+import {OpenNewRouteType} from "../../types/openNewRoute.type";
+import {DefaultResponseType} from "../../types/default-response.type";
+import {CategoriesType} from "../../types/categories.type";
 
 export class IncomeView {
-    constructor(openNewRoute) {
+    readonly openNewRoute: OpenNewRouteType;
+    readonly incomeCategoriesElement: HTMLElement | null;
+    readonly createNewCategoryElement: HTMLElement | null;
+    private deleteCategoryButtons: HTMLCollectionOf<Element> | null;
+    private id: string | null;
+    private confirmDeleteButtonElement: HTMLElement | null;
+
+    constructor(openNewRoute: OpenNewRouteType) {
         this.openNewRoute = openNewRoute;
         this.incomeCategoriesElement = document.getElementById('income-categories');
         this.createNewCategoryElement = document.getElementById('create-new-category');
+        this.deleteCategoryButtons = null;
+        this.id = '';
+        this.confirmDeleteButtonElement = null;
         this.showCategoriesIncomes().then();
     }
 
-    async showCategoriesIncomes() {
-        let result = await HttpUtils.request('/categories/income')
+    private async showCategoriesIncomes(): Promise<void> {
+        let result: DefaultResponseType | CategoriesType[] = await HttpUtils.request('/categories/income')
 
-        if (!result.error && result.response) {
-            result = result.response;
+        if (!(result as DefaultResponseType).error && (result as DefaultResponseType).response) {
+            result = (result as DefaultResponseType).response as CategoriesType[];
         } else {
             alert('Не удалось загрузить категории');
             return;
@@ -37,29 +50,34 @@ export class IncomeView {
             cardBodyElement.appendChild(cardBodyActionsElement);
 
             cardElement.appendChild(cardBodyElement);
-            this.incomeCategoriesElement.insertBefore(cardElement, this.createNewCategoryElement);
+            if (this.incomeCategoriesElement) {
+                this.incomeCategoriesElement.insertBefore(cardElement, this.createNewCategoryElement);
+            }
 
         })
 
         await this.deleteIncomeCategory();
     }
 
-    async deleteIncomeCategory() {
+    private async deleteIncomeCategory(): Promise<void> {
         this.deleteCategoryButtons = document.getElementsByClassName('btn-delete-category');
 
         if (this.deleteCategoryButtons.length > 0) {
             Array.from(this.deleteCategoryButtons).forEach((button, index) => {
-                button.addEventListener('click',  () => {
+                button.addEventListener('click', () => {
                     this.id = button.getAttribute('data-id-category');
-                    document.getElementById('confirm-delete-button').addEventListener('click', async () => {
-                        const result = await HttpUtils.request('/categories/income/' + this.id, 'DELETE');
+                    this.confirmDeleteButtonElement = document.getElementById('confirm-delete-button');
+                    if (this.confirmDeleteButtonElement) {
+                        this.confirmDeleteButtonElement.addEventListener('click', async () => {
+                            let result = await HttpUtils.request('/categories/income/' + this.id, 'DELETE')
 
-                        if (!result.error && result.response) {
-                            this.openNewRoute('/income-view');
-                        } else {
-                            alert('Ошибка удаления категории');
-                        }
-                    })
+                            if (!result.error && result.response) {
+                                await this.openNewRoute('/income-view');
+                            } else {
+                                alert('Ошибка удаления категории');
+                            }
+                        })
+                    }
                 });
             });
         }

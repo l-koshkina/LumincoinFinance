@@ -1,6 +1,6 @@
-import {Login} from "./components/auth/login.js";
-import {Main} from "./components/main.js";
-import {Signup} from "./components/auth/signup.js";
+import {Login} from "./components/auth/login";
+import {Main} from "./components/main";
+import {Signup} from "./components/auth/signup";
 import {IncomeView} from "./components/incomes/income-view";
 import {IncomeEdit} from "./components/incomes/income-edit";
 import {IncomeCreate} from "./components/incomes/income-create";
@@ -13,8 +13,15 @@ import {IncomesExpensesCreate} from "./components/incomes-expenses/incomes-expen
 import {IncomesExpensesView} from "./components/incomes-expenses/incomes-expenses-view";
 import {IncomesExpensesEdit} from "./components/incomes-expenses/incomes-expenses-edit";
 import {HttpUtils} from "./utils/http-utils";
+import {RouteType} from "./types/route.type";
+import {UserInfoType} from "./types/user-info.type";
+import {DefaultResponseType} from "./types/default-response.type";
 
 export class Router {
+    readonly titlePageElement: HTMLElement | null;
+    readonly contentPageElement: HTMLElement | null;
+    private routes: RouteType[];
+
     constructor() {
         this.titlePageElement = document.getElementById('title');
         this.contentPageElement = document.getElementById('content');
@@ -150,32 +157,38 @@ export class Router {
         ]
     }
 
-    initEvents() {
+    private initEvents(): void {
         window.addEventListener('DOMContentLoaded', this.activateRoute.bind(this));
         window.addEventListener('popstate', this.activateRoute.bind(this));
         document.addEventListener('click', this.clickHandler.bind(this));
     }
 
-    async openNewRoute(url) {
-        const currentRoute = window.location.pathname;
+    public async openNewRoute(url: string): Promise<void> {
+        // const currentRoute: string = window.location.pathname;
         history.pushState({}, '', url);
-        await this.activateRoute(null, currentRoute);
+        await this.activateRoute();
     }
 
-    async clickHandler(e) {
-        let element = null;
-        if (e.target.nodeName === 'A') {
-            element = e.target;
-        } else if (e.target.parentNode.nodeName === 'A') {
-            element = e.target.parentNode;
-        }
+    private async clickHandler(e: MouseEvent): Promise<void> {
+        let element: HTMLElement | HTMLAnchorElement | null = null;
+        const target: HTMLElement | HTMLAnchorElement | null = e.target as HTMLElement;
 
+        if (target) {
+            if (target.nodeName === 'A') {
+                element = target as HTMLAnchorElement;
+            } else if (target.parentNode) {
+                const parent = target.parentNode as HTMLElement;
+                if (parent.nodeName === 'A') {
+                    element = parent as HTMLAnchorElement;
+                }
+            }
+        }
 
         if (element) {
             e.preventDefault();
 
-            const currentRoute = window.location.pathname;
-            const url = element.href.replace(window.location.origin, '');
+            const currentRoute: string = window.location.pathname;
+            const url: string = (element as HTMLAnchorElement).href.replace(window.location.origin, '');
             if (!url || (currentRoute === url.replace('#', '')) || url.startsWith('javascript:void(0)')) {
                 return;
             }
@@ -184,26 +197,37 @@ export class Router {
         }
     }
 
-    async activateRoute() {
-        const urlRoute = window.location.pathname;
-        const newRoute = this.routes.find(item => item.route === urlRoute);
+    private async activateRoute(): Promise<void> {
+        const urlRoute: string = window.location.pathname;
+        const newRoute: RouteType | undefined = this.routes.find(item => item.route === urlRoute);
 
         if (newRoute) {
             if (newRoute.title) {
-                this.titlePageElement.innerText = newRoute.title + ' | Lumincoin Finance';
+                if (this.titlePageElement) {
+                    this.titlePageElement.innerText = newRoute.title + ' | Lumincoin Finance';
+                }
             }
 
             if (newRoute.filePathTemplate) {
 
                 if (newRoute.useLayout) {
-                    this.contentPageElement.innerHTML = await fetch(newRoute.useLayout).then(response => response.text());
-                    const contentLayoutPageElement = document.getElementById('content-layout');
-                    contentLayoutPageElement.innerHTML = await fetch(newRoute.filePathTemplate).then(response => response.text());
-                    this.activateMenuItem(newRoute);
-                    if (document.body.clientWidth <= 768) {
-                        document.getElementById('offcanvasExample').classList.add('offcanvas', 'offcanvas-start');
-                        document.getElementById('offcanvas-btn').classList.remove('d-none');
-                        document.getElementById('offcanvas-btn-close').classList.remove('d-none');
+                    if (this.contentPageElement && typeof newRoute.useLayout === 'string') {
+                        this.contentPageElement.innerHTML = await fetch(newRoute.useLayout).then(response => response.text());
+                        const contentLayoutPageElement: HTMLElement | null = document.getElementById('content-layout');
+                        if (contentLayoutPageElement) {
+                            contentLayoutPageElement.innerHTML = await fetch(newRoute.filePathTemplate).then(response => response.text());
+                        }
+                        this.activateMenuItem(newRoute);
+                        if (document.body.clientWidth <= 768) {
+                            const offcanvasExampleElement: HTMLElement | null = document.getElementById('offcanvasExample');
+                            const offcanvasBtnElement: HTMLElement | null = document.getElementById('offcanvas-btn');
+                            const offcanvasBtnCloseElement: HTMLElement | null = document.getElementById('offcanvas-btn-close');
+                            if (offcanvasExampleElement && offcanvasBtnElement && offcanvasBtnCloseElement) {
+                                offcanvasExampleElement.classList.add('offcanvas', 'offcanvas-start');
+                                offcanvasBtnElement.classList.remove('d-none');
+                                offcanvasBtnCloseElement.classList.remove('d-none');
+                            }
+                        }
                     }
 
                     //Установка баланса
@@ -213,11 +237,14 @@ export class Router {
 
                     //Установка имени пользователя
 
-                    const usernameElement = document.getElementById('username');
-                    const userInfo = JSON.parse(AuthUtils.getAuthInfo(AuthUtils.userInfoKey));
+                    const usernameElement: HTMLElement | null = document.getElementById('username');
+                    const authInfo: string | null = AuthUtils.getAuthInfo(AuthUtils.userInfoKey)
+                    const userInfo: UserInfoType | null = authInfo ? JSON.parse(authInfo) : null
 
                     if (userInfo && userInfo.name && userInfo.lastName) {
-                        usernameElement.innerText = userInfo.name + ' ' + userInfo.lastName;
+                        if (usernameElement) {
+                            usernameElement.innerText = userInfo.name + ' ' + userInfo.lastName;
+                        }
                     } else {
                         history.pushState({}, '', '/login');
                         await this.activateRoute();
@@ -225,7 +252,9 @@ export class Router {
 
 
                 } else {
-                    this.contentPageElement.innerHTML = await fetch(newRoute.filePathTemplate).then(response => response.text());
+                    if (this.contentPageElement) {
+                        this.contentPageElement.innerHTML = await fetch(newRoute.filePathTemplate).then(response => response.text());
+                    }
                 }
             }
 
@@ -238,41 +267,47 @@ export class Router {
         }
     }
 
-    activateMenuItem(route) {
-        document.querySelectorAll('.nav-link').forEach(item => {
-            const href = item.getAttribute('href');
-            item.addEventListener('click', (e) => {
-                if (href.startsWith('javascript:void(0)')) {
+    private activateMenuItem(route: RouteType): void {
+        const navLinkElements: NodeListOf<Element> | null = document.querySelectorAll('.nav-link');
+        if (navLinkElements) {
+            navLinkElements.forEach((item: Element) => {
+                const href: string | null = item.getAttribute('href');
+                item.addEventListener('click', (e) => {
+                    if (href == 'javascript:void(0);') {
+                        item.classList.add('active');
+                        item.classList.remove('link-dark');
+                    }
+                });
+
+                if (href === route.route) {
                     item.classList.add('active');
                     item.classList.remove('link-dark');
+                } else if (route.route === '/expense-view' || route.route === '/income-view') {
+                    if (href == 'javascript:void(0);') {
+                        item.classList.add('active');
+                        item.classList.remove('link-dark');
+                    }
+                } else {
+                    item.classList.remove('active');
+                    item.classList.add('link-dark');
                 }
-            })
-            if (href === route.route) {
-                item.classList.add('active');
-                item.classList.remove('link-dark');
-            } else if (route.route === '/expense-view' || route.route === '/income-view') {
-                if (href.startsWith('javascript:void(0)')) {
-                    item.classList.add('active');
-                    item.classList.remove('link-dark');
-                }
-            } else {
-                item.classList.remove('active');
-                item.classList.add('link-dark');
-            }
-
-        });
-
-    }
-
-    async setBalance() {
-        const result = await HttpUtils.request('/balance')
-        if (!result.error && result.response) {
-            document.getElementById('balance-amount').innerText = result.response.balance + '$';
+            });
         }
     }
 
-    async setNewBalance() {
-        await HttpUtils.request('/balance', 'PUT',true, {
+
+    private async setBalance(): Promise<void> {
+        const result: DefaultResponseType = await HttpUtils.request('/balance')
+        if (!result.error && result.response) {
+            const balanceAmountElement = document.getElementById('balance-amount');
+            if (balanceAmountElement) {
+                balanceAmountElement.innerText = result.response.balance + '$';
+            }
+        }
+    }
+
+    private async setNewBalance(): Promise<void> {
+        await HttpUtils.request('/balance', 'PUT', true, {
             newBalance: 0
         })
     }
